@@ -23,6 +23,12 @@ export default async function handler(req, res) {
     return
   }
 
+  const mimeMatch = imageDataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,/)
+  if (!mimeMatch) {
+    res.status(400).json({ error: 'imageDataUrl must be a base64 image data URL' })
+    return
+  }
+
   try {
     const result = await generateText({
       model: openai('gpt-5'),
@@ -35,7 +41,7 @@ export default async function handler(req, res) {
               type: 'text',
               text: 'You are a UX design assistant. Look at this UI screenshot and propose 4 distinct alternative "icebreaker" UI concepts as fresh reinterpretations for the same product. Vary the tone and layout meaningfully across the 4.',
             },
-            { type: 'file', mediaType: 'image', data: imageDataUrl },
+            { type: 'file', mediaType: mimeMatch[1], data: imageDataUrl },
           ],
         },
       ],

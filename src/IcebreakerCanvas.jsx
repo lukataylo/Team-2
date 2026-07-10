@@ -19,12 +19,11 @@ function downscaleToDataUrl(file) {
 }
 
 // ponytail: hand-rolled drag-to-pan + wheel-to-zoom, a Figma-style canvas is just a CSS transform.
-export default function IcebreakerCanvas() {
+export default function IcebreakerCanvas({ view, setView, fileInputRef }) {
   const [imageDataUrl, setImageDataUrl] = useState(null)
   const [status, setStatus] = useState('idle') // idle | loading | error
   const [errorMsg, setErrorMsg] = useState('')
   const [variants, setVariants] = useState([])
-  const [view, setView] = useState({ x: 0, y: 0, zoom: 1 })
   const dragRef = useRef(null)
 
   async function handleFile(e) {
@@ -77,51 +76,50 @@ export default function IcebreakerCanvas() {
   }
 
   return (
-    <section className="icebreaker">
-      <p className="stage__blurb">
-        🧊 Upload a UI screenshot and the AI will sketch 4 alternative "icebreaker" concepts for
-        it, laid out on an infinite canvas you can drag to pan and scroll to zoom.
-      </p>
-
-      <div className="icebreaker__controls">
-        <input type="file" accept="image/*" onChange={handleFile} />
+    <div
+      className="canvas"
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerLeave={onPointerUp}
+      onWheel={onWheel}
+    >
+      <div className="icebreaker__toolbar">
+        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFile} />
         <button className="cta" disabled={!imageDataUrl || status === 'loading'} onClick={generate}>
           {status === 'loading' ? 'Generating…' : 'Generate icebreaker UIs'}
         </button>
         {imageDataUrl && <img className="icebreaker__preview" src={imageDataUrl} alt="Uploaded design" />}
+        {status === 'error' && <p className="card__bounce">⚠️ {errorMsg}</p>}
       </div>
 
-      {status === 'error' && <p className="card__bounce">⚠️ {errorMsg}</p>}
+      {variants.length === 0 && status !== 'loading' && (
+        <p className="canvas__hint">
+          🧊 Upload a UI screenshot above — the AI sketches 4 alternative "icebreaker" concepts here.
+          Drag to pan, scroll to zoom.
+        </p>
+      )}
 
       <div
-        className="canvas"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerLeave={onPointerUp}
-        onWheel={onWheel}
+        className="canvas__world"
+        style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})` }}
       >
-        <div
-          className="canvas__world"
-          style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})` }}
-        >
-          {variants.map((v, i) => (
-            <div key={i} className="variant-card" style={{ left: v.x, top: v.y, borderColor: v.accentColor }}>
-              <div className="variant-card__nav" style={{ background: v.accentColor }}>
-                {v.navStyle}
-              </div>
-              <div className="variant-card__body">
-                <h3>{v.title}</h3>
-                <p className="variant-card__hero">{v.heroText}</p>
-                <button className="variant-card__cta" style={{ background: v.accentColor }}>
-                  {v.ctaText}
-                </button>
-                <p className="variant-card__rationale">{v.rationale}</p>
-              </div>
+        {variants.map((v, i) => (
+          <div key={i} className="variant-card" style={{ left: v.x, top: v.y, borderColor: v.accentColor }}>
+            <div className="variant-card__nav" style={{ background: v.accentColor }}>
+              {v.navStyle}
             </div>
-          ))}
-        </div>
+            <div className="variant-card__body">
+              <h3>{v.title}</h3>
+              <p className="variant-card__hero">{v.heroText}</p>
+              <button className="variant-card__cta" style={{ background: v.accentColor }}>
+                {v.ctaText}
+              </button>
+              <p className="variant-card__rationale">{v.rationale}</p>
+            </div>
+          </div>
+        ))}
       </div>
-    </section>
+    </div>
   )
 }

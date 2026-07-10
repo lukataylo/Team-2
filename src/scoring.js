@@ -40,7 +40,7 @@ export function scoreFeedback(text) {
 }
 
 export const SEVERITY = {
-  minor: { label: 'Minor', multiplier: 1, color: '#5fb0ff' },
-  major: { label: 'Major', multiplier: 1.5, color: '#ffb02e' },
-  critical: { label: 'Critical', multiplier: 2, color: '#ff4d5e' },
+  minor: { label: 'Minor', multiplier: 1, color: '#9a9a9a' },
+  major: { label: 'Major', multiplier: 1.5, color: '#4a4a4a' },
+  critical: { label: 'Critical', multiplier: 2, color: '#000000' },
 }

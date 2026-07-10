@@ -105,16 +105,12 @@ export default function IcebreakerCanvas({ view, setView, fileInputRef }) {
         style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.zoom})` }}
       >
         {variants.map((v, i) => (
-          <div key={i} className="variant-card" style={{ left: v.x, top: v.y, borderColor: v.accentColor }}>
-            <div className="variant-card__nav" style={{ background: v.accentColor }}>
-              {v.navStyle}
-            </div>
+          <div key={i} className="variant-card" style={{ left: v.x, top: v.y }}>
+            <div className="variant-card__nav">{v.navStyle}</div>
             <div className="variant-card__body">
               <h3>{v.title}</h3>
               <p className="variant-card__hero">{v.heroText}</p>
-              <button className="variant-card__cta" style={{ background: v.accentColor }}>
-                {v.ctaText}
-              </button>
+              <button className="variant-card__cta">{v.ctaText}</button>
               <p className="variant-card__rationale">{v.rationale}</p>
             </div>
           </div>

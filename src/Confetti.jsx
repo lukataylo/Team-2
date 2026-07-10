@@ -1,6 +1,6 @@
 // ponytail: hand-rolled confetti, a dozen styled divs — not worth a dependency for one burst.
 
-const COLORS = ['#ff4d5e', '#ffb02e', '#5fb0ff', '#7dffb0', '#c084fc']
+const COLORS = ['#000000', '#4a4a4a', '#9a9a9a', '#ffffff']
 
 export default function Confetti({ count = 60 }) {
   const pieces = Array.from({ length: count }, (_, i) => ({

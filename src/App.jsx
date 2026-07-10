@@ -21,9 +21,9 @@ const TOOLS = [
   { key: 'eraser', Icon: EraserIcon, label: 'Eraser' },
 ]
 const AVATARS = [
-  { initials: 'LD', color: '#5fb0ff' },
-  { initials: 'AN', color: '#ffb02e' },
-  { initials: 'RY', color: '#ff4d5e' },
+  { initials: 'LD', color: '#000000' },
+  { initials: 'AN', color: '#4a4a4a' },
+  { initials: 'RY', color: '#9a9a9a' },
 ]
 
 export default function App() {

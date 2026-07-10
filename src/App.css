@@ -32,7 +32,10 @@ html, body, #root {
 }
 
 .board__logo {
-  font-size: 18px;
+  height: 28px;
+  width: 28px;
+  object-fit: contain;
+  border-radius: 6px;
 }
 
 .board__name {

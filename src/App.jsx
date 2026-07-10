@@ -65,7 +65,7 @@ export default function App() {
     <div className="board">
       <header className="board__topbar">
         <div className="board__brand">
-          <span className="board__logo">⚔️</span>
+          <img className="board__logo" src="/logo.png" alt="Crit Quest" />
           <span className="board__name">Crit Quest board</span>
         </div>
 

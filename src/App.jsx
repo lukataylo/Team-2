@@ -26,11 +26,54 @@ const AVATARS = [
   { initials: 'RY', color: '#9a9a9a' },
 ]
 
+// ponytail: seed board — variants pre-generated once with gpt-image-1, shipped as static assets.
+const SEED = import.meta.env.BASE_URL + 'seed/'
+const SEED_BOARDS = [
+  { label: 'Original', src: SEED + 'original.png' },
+  { label: 'Minimal', src: SEED + 'minimal.jpg' },
+  { label: 'Playful', src: SEED + 'playful.jpg' },
+  { label: 'Professional', src: SEED + 'professional.jpg' },
+  { label: 'Bold', src: SEED + 'bold.jpg' },
+]
+const INITIAL_ELEMENTS = [
+  ...SEED_BOARDS.flatMap((b, i) => [
+    { id: `seed-label-${i}`, type: 'text', x: 60 + i * 380, y: 30, text: b.label, editing: false },
+    { id: `seed-img-${i}`, type: 'image', x: 60 + i * 380, y: 70, src: b.src },
+  ]),
+  {
+    id: 'seed-comment-1',
+    type: 'comment',
+    x: 340, y: 140, open: true, draft: '',
+    comments: [
+      'AN: Search says "DevOps Engineer" but the top result is a Hardware Engineer — results don\'t match the query',
+      'LD: +1, that kills trust in the search instantly',
+    ],
+  },
+  {
+    id: 'seed-comment-2',
+    type: 'comment',
+    x: 90, y: 420, open: false, draft: '',
+    comments: ['RY: The neon yellow card fails contrast — the white chips and "See details" button are barely readable'],
+  },
+  {
+    id: 'seed-comment-3',
+    type: 'comment',
+    x: 300, y: 560, open: false, draft: '',
+    comments: ['AN: "Senior" and "$2400/month" fight for attention — unclear which is the primary info'],
+  },
+  {
+    id: 'seed-comment-4',
+    type: 'comment',
+    x: 700, y: 480, open: false, draft: '',
+    comments: ['LD: Minimal version loses the availability chip — recruiters filter on that'],
+  },
+]
+
 export default function App() {
   const [view, setView] = useState('canvas') // canvas | gamification
   const [tool, setTool] = useState('pointer')
   const [canvasView, setCanvasView] = useState({ x: 0, y: 0, zoom: 1 })
-  const [elements, setElements] = useState([])
+  const [elements, setElements] = useState(INITIAL_ELEMENTS)
   const [showComments, setShowComments] = useState(false)
   const comments = elements.filter((el) => el.type === 'comment')
 

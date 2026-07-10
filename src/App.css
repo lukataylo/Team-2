@@ -664,19 +664,6 @@ html, body, #root {
   border: 2px solid var(--border);
 }
 
-.icebreaker__divider {
-  width: 1px;
-  height: 24px;
-  background: var(--border);
-}
-
-.icebreaker__toolbar .cta--secondary {
-  background: #fff;
-  color: #000;
-  border: 2px solid #000;
-  padding: 8px 16px;
-}
-
 .canvas__hint {
   position: absolute;
   top: 50%;

@@ -33,7 +33,6 @@ export default function IcebreakerCanvas({ view, setView, tool, setTool, element
   const panRef = useRef(null)
   const draggingElRef = useRef(null)
   const creatingRef = useRef(null)
-  const uploadImageInputRef = useRef(null)
 
   function addElement(data) {
     setElements((els) => [...els, data])
@@ -61,19 +60,13 @@ export default function IcebreakerCanvas({ view, setView, tool, setTool, element
     setVariants([])
   }
 
-  async function handleUploadImage(e) {
-    const file = e.target.files?.[0]
+  async function handleDropImage(e) {
+    e.preventDefault()
+    const file = [...(e.dataTransfer?.files || [])].find((f) => f.type.startsWith('image/'))
     if (!file) return
     const dataUrl = await downscaleToDataUrl(file)
-    const count = elements.filter((el) => el.type === 'image').length
-    addElement({
-      id: makeId(),
-      type: 'image',
-      x: 80 + (count % 3) * 260,
-      y: 80 + Math.floor(count / 3) * 220,
-      src: dataUrl,
-    })
-    e.target.value = ''
+    const point = getCanvasPoint(e)
+    addElement({ id: makeId(), type: 'image', x: point.x, y: point.y, src: dataUrl })
   }
 
   async function generate() {
@@ -179,6 +172,8 @@ export default function IcebreakerCanvas({ view, setView, tool, setTool, element
       onPointerUp={onCanvasPointerUp}
       onPointerLeave={onCanvasPointerUp}
       onWheel={onWheel}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={handleDropImage}
     >
       <div className="icebreaker__toolbar">
         <input type="file" accept="image/*" onChange={handleFile} />
@@ -187,25 +182,13 @@ export default function IcebreakerCanvas({ view, setView, tool, setTool, element
         </button>
         {imageDataUrl && <img className="icebreaker__preview" src={imageDataUrl} alt="Uploaded design" />}
         {status === 'error' && <p className="card__bounce">⚠️ {errorMsg}</p>}
-
-        <span className="icebreaker__divider" />
-
-        <input
-          ref={uploadImageInputRef}
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={handleUploadImage}
-        />
-        <button className="cta cta--secondary" onClick={() => uploadImageInputRef.current?.click()}>
-          Upload image to board
-        </button>
       </div>
 
       {variants.length === 0 && elements.length === 0 && status !== 'loading' && (
         <p className="canvas__hint">
           🧊 Upload a UI screenshot above — the AI sketches 4 alternative "icebreaker" concepts here.
-          Drag to pan, scroll to zoom, or pick a tool from the left rail to annotate.
+          Drop image files anywhere to add your own screens. Drag to pan, scroll to zoom, or pick a
+          tool from the left rail to annotate.
         </p>
       )}
 

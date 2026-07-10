@@ -2,11 +2,13 @@ import { useState } from 'react'
 import DesignMockup from './DesignMockup'
 import FeedbackCard from './FeedbackCard'
 import Confetti from './Confetti'
+import IcebreakerCanvas from './IcebreakerCanvas'
 import './App.css'
 
 const BOSS_MAX_HP = 250
 
 export default function App() {
+  const [view, setView] = useState('quest') // quest | canvas
   const [phase, setPhase] = useState('warmup') // warmup | boss | victory
   const [warmupCards, setWarmupCards] = useState([])
   const [bossCards, setBossCards] = useState([])
@@ -31,10 +33,22 @@ export default function App() {
     <div className="app">
       <header className="app__header">
         <h1>⚔️ Crit Quest</h1>
-        <div className="app__xp">Total XP: {totalXp}</div>
+        <div className="app__header-right">
+          <nav className="tabs">
+            <button className={`tabs__tab ${view === 'quest' ? 'tabs__tab--active' : ''}`} onClick={() => setView('quest')}>
+              Quest
+            </button>
+            <button className={`tabs__tab ${view === 'canvas' ? 'tabs__tab--active' : ''}`} onClick={() => setView('canvas')}>
+              Icebreaker Canvas
+            </button>
+          </nav>
+          <div className="app__xp">Total XP: {totalXp}</div>
+        </div>
       </header>
 
-      {phase === 'warmup' && (
+      {view === 'canvas' && <IcebreakerCanvas />}
+
+      {view === 'quest' && phase === 'warmup' && (
         <section className="stage">
           <p className="stage__blurb">
             🧪 <strong>Warm-up round.</strong> This is a decoy the AI deliberately broke. Rip it apart —
@@ -61,7 +75,7 @@ export default function App() {
         </section>
       )}
 
-      {phase === 'boss' && (
+      {view === 'quest' && phase === 'boss' && (
         <section className="stage">
           <p className="stage__blurb">
             🐉 <strong>Boss fight.</strong> This is the real design. Every specific piece of feedback
@@ -82,7 +96,7 @@ export default function App() {
         </section>
       )}
 
-      {phase === 'victory' && (
+      {view === 'quest' && phase === 'victory' && (
         <section className="stage stage--victory">
           <Confetti />
           <h2 className="victory__title">🏆 Boss defeated!</h2>

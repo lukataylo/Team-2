@@ -1,32 +1,28 @@
-import { generateText, Output } from 'ai'
-import { openai } from '@ai-sdk/openai'
+import { generateText } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
-import { z } from 'zod'
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY,
 })
 
-const VariantSchema = z.object({
-  title: z.string().describe('Short punchy name for this UI concept'),
-  rationale: z.string().describe('One sentence on why this reinterpretation works'),
-  navStyle: z.enum(['minimal', 'tabs', 'sidebar']),
-  heroText: z.string().describe('A short hero headline for this concept'),
-  ctaText: z.string().describe('Call-to-action button label'),
-  accentColor: z.string().describe('A hex color code, e.g. #5fb0ff'),
-})
+const ANGLES = [
+  { label: 'Minimal', prompt: 'a stripped-back, minimal reinterpretation with lots of white space and one clear action' },
+  { label: 'Playful', prompt: 'a playful, colorful reinterpretation with a fun, casual tone' },
+  { label: 'Professional', prompt: 'a professional, enterprise-grade reinterpretation with a dense, trustworthy layout' },
+  { label: 'Bold', prompt: 'a bold, high-contrast reinterpretation with oversized type and strong visual hierarchy' },
+]
 
-const PROMPT = 'You are a UX design assistant. Look at this UI screenshot and propose 4 distinct alternative "icebreaker" UI concepts as fresh reinterpretations for the same product. Vary the tone and layout meaningfully across the 4.'
-
-function callModel(model, mediaType, imageDataUrl) {
+function generateVariantImage(mediaType, imageDataUrl, angle) {
   return generateText({
-    model,
-    output: Output.array({ element: VariantSchema }),
+    model: google('gemini-2.5-flash-image'),
     messages: [
       {
         role: 'user',
         content: [
-          { type: 'text', text: PROMPT },
+          {
+            type: 'text',
+            text: `You are a UX design assistant. Look at this UI screenshot and generate a new UI mockup image that reimagines it as ${angle.prompt}. Keep the same core purpose and content, but redesign the layout and visual style. Output only the image.`,
+          },
           { type: 'file', mediaType, data: imageDataUrl },
         ],
       },
@@ -53,14 +49,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const result = await callModel(openai('gpt-5'), mimeMatch[1], imageDataUrl)
-    res.status(200).json({ variants: result.output })
-  } catch (openaiErr) {
-    try {
-      const result = await callModel(google('gemini-flash-latest'), mimeMatch[1], imageDataUrl)
-      res.status(200).json({ variants: result.output })
-    } catch (geminiErr) {
-      res.status(502).json({ error: geminiErr.message || openaiErr.message || 'Generation failed' })
+    // ponytail: sequential, not Promise.all — free-tier Gemini image quotas are per-minute and tight.
+    const variants = []
+    for (const angle of ANGLES) {
+      const result = await generateVariantImage(mimeMatch[1], imageDataUrl, angle)
+      const file = result.files.find((f) => f.mediaType.startsWith('image/'))
+      if (!file) throw new Error(`No image returned for the "${angle.label}" concept`)
+      variants.push({ label: angle.label, imageDataUrl: `data:${file.mediaType};base64,${file.base64}` })
     }
+
+    res.status(200).json({ variants })
+  } catch (err) {
+    res.status(502).json({ error: err.message || 'Generation failed' })
   }
 }

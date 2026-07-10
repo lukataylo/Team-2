@@ -106,13 +106,8 @@ export default function IcebreakerCanvas({ view, setView, fileInputRef }) {
       >
         {variants.map((v, i) => (
           <div key={i} className="variant-card" style={{ left: v.x, top: v.y }}>
-            <div className="variant-card__nav">{v.navStyle}</div>
-            <div className="variant-card__body">
-              <h3>{v.title}</h3>
-              <p className="variant-card__hero">{v.heroText}</p>
-              <button className="variant-card__cta">{v.ctaText}</button>
-              <p className="variant-card__rationale">{v.rationale}</p>
-            </div>
+            <div className="variant-card__nav">{v.label}</div>
+            <img className="variant-card__image" src={v.imageDataUrl} alt={`${v.label} concept`} />
           </div>
         ))}
       </div>

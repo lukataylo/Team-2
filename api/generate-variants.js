@@ -3,7 +3,9 @@ import { openai } from '@ai-sdk/openai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { z } from 'zod'
 
-const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY })
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+})
 
 const VariantSchema = z.object({
   title: z.string().describe('Short punchy name for this UI concept'),

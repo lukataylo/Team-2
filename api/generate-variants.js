@@ -1,4 +1,5 @@
-import { generateText } from 'ai'
+import { generateImage, generateText } from 'ai'
+import { openai } from '@ai-sdk/openai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 
 const google = createGoogleGenerativeAI({
@@ -12,22 +13,34 @@ const ANGLES = [
   { label: 'Bold', prompt: 'a bold, high-contrast reinterpretation with oversized type and strong visual hierarchy' },
 ]
 
-function generateVariantImage(mediaType, imageDataUrl, angle) {
-  return generateText({
+function promptFor(angle) {
+  return `Redesign this UI screenshot as ${angle.prompt}. Keep the same core purpose and content, but redesign the layout and visual style. Output only the image.`
+}
+
+async function generateWithOpenAI(imageDataUrl, angle) {
+  const { image } = await generateImage({
+    model: openai.image('gpt-image-1'),
+    prompt: { images: [imageDataUrl], text: promptFor(angle) },
+  })
+  return `data:${image.mediaType};base64,${image.base64}`
+}
+
+async function generateWithGemini(mediaType, imageDataUrl, angle) {
+  const result = await generateText({
     model: google('gemini-2.5-flash-image'),
     messages: [
       {
         role: 'user',
         content: [
-          {
-            type: 'text',
-            text: `You are a UX design assistant. Look at this UI screenshot and generate a new UI mockup image that reimagines it as ${angle.prompt}. Keep the same core purpose and content, but redesign the layout and visual style. Output only the image.`,
-          },
+          { type: 'text', text: promptFor(angle) },
           { type: 'file', mediaType, data: imageDataUrl },
         ],
       },
     ],
   })
+  const file = result.files.find((f) => f.mediaType.startsWith('image/'))
+  if (!file) throw new Error(`No image returned for the "${angle.label}" concept`)
+  return `data:${file.mediaType};base64,${file.base64}`
 }
 
 export default async function handler(req, res) {
@@ -49,13 +62,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    // ponytail: sequential, not Promise.all — free-tier Gemini image quotas are per-minute and tight.
+    // ponytail: sequential, not Promise.all — free-tier image quotas are per-minute and tight.
     const variants = []
     for (const angle of ANGLES) {
-      const result = await generateVariantImage(mimeMatch[1], imageDataUrl, angle)
-      const file = result.files.find((f) => f.mediaType.startsWith('image/'))
-      if (!file) throw new Error(`No image returned for the "${angle.label}" concept`)
-      variants.push({ label: angle.label, imageDataUrl: `data:${file.mediaType};base64,${file.base64}` })
+      let variantImageDataUrl
+      try {
+        variantImageDataUrl = await generateWithOpenAI(imageDataUrl, angle)
+      } catch {
+        variantImageDataUrl = await generateWithGemini(mimeMatch[1], imageDataUrl, angle)
+      }
+      variants.push({ label: angle.label, imageDataUrl: variantImageDataUrl })
     }
 
     res.status(200).json({ variants })

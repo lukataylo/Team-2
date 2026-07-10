@@ -1,0 +1,7 @@
+.shape-el {
+  box-sizing: border-box;
+  background: #fff;
+  border: 3px solid #000;
+  border-radius: 4px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+}

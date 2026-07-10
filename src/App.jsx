@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import DesignMockup from './DesignMockup'
 import FeedbackCard from './FeedbackCard'
 import Confetti from './Confetti'
@@ -30,7 +30,9 @@ export default function App() {
   const [view, setView] = useState('canvas') // canvas | gamification
   const [tool, setTool] = useState('pointer')
   const [canvasView, setCanvasView] = useState({ x: 0, y: 0, zoom: 1 })
-  const fileInputRef = useRef(null)
+  const [elements, setElements] = useState([])
+  const [showComments, setShowComments] = useState(false)
+  const comments = elements.filter((el) => el.type === 'comment')
 
   const [phase, setPhase] = useState('warmup') // warmup | boss | victory
   const [warmupCards, setWarmupCards] = useState([])
@@ -58,7 +60,7 @@ export default function App() {
 
   function handleAiAssistantClick() {
     setView('canvas')
-    fileInputRef.current?.click()
+    setShowComments(true)
   }
 
   return (
@@ -115,7 +117,14 @@ export default function App() {
 
         <main className="board__main">
           {view === 'canvas' && (
-            <IcebreakerCanvas view={canvasView} setView={setCanvasView} fileInputRef={fileInputRef} />
+            <IcebreakerCanvas
+              view={canvasView}
+              setView={setCanvasView}
+              tool={tool}
+              setTool={setTool}
+              elements={elements}
+              setElements={setElements}
+            />
           )}
 
           {view === 'gamification' && (
@@ -207,9 +216,44 @@ export default function App() {
         </div>
       )}
 
-      <button className="fab" onClick={handleAiAssistantClick} title="Generate with AI">
+      <button className="fab" onClick={handleAiAssistantClick} title="Collate comments">
         <SparkleIcon />
       </button>
+
+      {showComments && <CommentsPanel comments={comments} onClose={() => setShowComments(false)} />}
+    </div>
+  )
+}
+
+function CommentsPanel({ comments, onClose }) {
+  return (
+    <div className="comments-modal-backdrop" onClick={onClose}>
+      <div className="comments-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="comments-modal__header">
+          <h2>💬 Collated comments</h2>
+          <button className="comments-modal__close" onClick={onClose}>✕</button>
+        </div>
+        {comments.length === 0 ? (
+          <p className="comments-modal__empty">
+            No comments on the board yet. Use the Comment tool on the canvas to leave feedback.
+          </p>
+        ) : (
+          comments.map((pin, i) => (
+            <div key={pin.id} className="comments-modal__thread">
+              <h4>Thread {i + 1}</h4>
+              {pin.comments.length === 0 ? (
+                <p className="comments-modal__empty">No comments in this thread yet.</p>
+              ) : (
+                <ul>
+                  {pin.comments.map((c, j) => (
+                    <li key={j}>{c}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   )
 }

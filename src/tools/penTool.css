@@ -1,0 +1,7 @@
+.pen-el {
+  display: block;
+}
+
+.pen-el__stroke {
+  stroke: #000;
+}

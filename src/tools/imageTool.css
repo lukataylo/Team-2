@@ -1,0 +1,8 @@
+.image-el {
+  display: block;
+  width: 320px;
+  height: auto;
+  border: 3px solid #000;
+  border-radius: 8px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+}

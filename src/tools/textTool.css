@@ -1,0 +1,38 @@
+.text-el {
+  min-width: 40px;
+  min-height: 24px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #000;
+  white-space: pre-wrap;
+  word-break: break-word;
+  cursor: text;
+}
+
+.text-el--empty {
+  min-width: 120px;
+  min-height: 28px;
+  border: 2px dashed var(--border);
+  border-radius: 6px;
+}
+
+.text-el__input {
+  display: block;
+  width: 220px;
+  min-height: 28px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: #000;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 0;
+  margin: 0;
+}
+
+.text-el__input::placeholder {
+  color: #9a9a9a;
+  font-weight: 400;
+}
